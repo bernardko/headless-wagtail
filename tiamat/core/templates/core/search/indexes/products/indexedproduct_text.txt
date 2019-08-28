@@ -1,0 +1,8 @@
+{{ object.title }}
+{{ object.product.brand }}
+{% for category_name in object.product.get_categories %}
+{{ category_name }}
+{% endfor %}
+{% for subreddit, num_revs in object.product.get_referrer_subreddits %}
+{{ subreddit }}
+{% endfor %}

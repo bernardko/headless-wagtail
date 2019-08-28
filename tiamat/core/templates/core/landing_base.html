@@ -1,0 +1,264 @@
+{% load static core_tags home_tags wagtailcore_tags wagtailimages_tags wagtailuserbar compress cache %}{% get_site_root as site_root %}{% get_site as site %}{% spaceless %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+      <meta charset="utf-8">
+      <meta http-equiv="X-UA-Compatible" content="IE=edge">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <meta name="description" content="{% block description %}{% endblock description %}">
+
+      <title>{% block title %}{{ self.seo_title }}{% endblock title %} | PriceCray</title>
+
+      <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+      <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+      <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+      <link rel="manifest" href="/site.webmanifest">
+      <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#58c5c7">
+      <meta name="apple-mobile-web-app-title" content="PriceCray">
+      <meta name="application-name" content="PriceCray">
+      <meta name="msapplication-TileColor" content="#58c5c7">
+      <meta name="theme-color" content="#ffffff">
+
+      {% if settings.DEBUG %}
+        <meta name="robots" content="noindex">
+      {% else %}
+        {% if self.meta_robots_noindex or self.meta_robots_nofollow %}
+          {% if self.meta_robots_options == self.ROBOTS_APPLY_ALL_PAGES %}
+            <meta name="robots" content="{% if self.meta_robots_noindex %}noindex{% else %}index{% endif %},{% if self.meta_robots_nofollow %}nofollow{% else %}follow{% endif %}">
+          {% elif self.meta_robots_options == self.ROBOTS_EXCLUDE_FIRST_PAGE and page_obj.page != 1 %}
+            <meta name="robots" content="{% if self.meta_robots_noindex %}noindex{% else %}index{% endif %},{% if self.meta_robots_nofollow %}nofollow{% else %}follow{% endif %}">
+          {% endif %}
+        {% endif %}
+      {% endif %}
+
+      <link rel='stylesheet' type="text/css" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700">
+      <link rel='stylesheet' type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:400,300,500,700">
+      {% compress css %}
+      <!-- Bootstrap core CSS -->
+      <link rel="stylesheet" type="text/css" href="{% static 'home/css/bootstrap.min.css' %}">
+
+      <!-- Animation CSS -->
+      <link rel="stylesheet" type="text/css" href="{% static 'home/css/animate.css' %}">
+      <link rel="stylesheet" type="text/css" href="{% static 'home/font-awesome/css/font-awesome.min.css' %}">
+
+      {% comment %}
+      <!-- Slick Carousel -->
+      <link rel="stylesheet" type="text/css" href="{% static 'home/css/plugins/slick/slick.css' %}">
+      <link rel="stylesheet" type="text/css" href="{% static 'home/css/plugins/slick/slick-theme.css' %}">
+      {% endcomment %}
+
+      <!-- Custom styles for this template -->
+      <link rel="stylesheet" type="text/css" href="{% static 'home/css/style.css' %}">
+      <link rel="stylesheet" type="text/css" href="{% static 'home/css/holo.css' %}">
+      <link rel="stylesheet" type="text/css" href="{% static 'home/css/dropdown.css' %}">
+      <link rel="stylesheet" type="text/css" href="{% static 'home/libs/cookieconsent2/3.1.0/cookieconsent.min.css' %}">
+      {% endcompress %}
+      <style>
+
+      </style>
+      {% comment %}<link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.css" />{% endcomment %}
+
+      {% block facebook %}
+        <meta property="og:title" content="{% block og_title %}{% endblock og_title %} | PriceCray">
+        <meta property="og:description" content="{% block og_description %}Find the Amazon deals and price drops on pricecray!{% endblock og_description %}">
+        <meta property="og:image" content="{% block og_image %}https://www.pricecray.com/static/home/img/pricecray_logo_share.png{% endblock og_image %}">
+        <meta property="og:type" content="{% block og_type %}website{% endblock og_type %}">
+        <meta property="og:site_name" content="PriceCray" />
+        <meta property="og:determiner" content="auto">
+      {% endblock facebook %}
+
+      {% block twitter %}
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:site" content="@pricecray">
+        <meta name="twitter:title" content="{% block twitter_title %}{% endblock twitter_title %} | PriceCray">
+        <meta name="twitter:description" content="{% block twitter_description %}Find the Amazon deals and price drops on PriceCray!{% endblock twitter_description %}">
+        <meta name="twitter:creator" content="@pricecray">
+        <meta name="twitter:image" content="{% block twitter_image %}https://www.pricecray.com/static/home/img/pricecray_logo_share.png{% endblock twitter_image %}">
+      {% endblock twitter %}
+
+      {% block head %}{% endblock head %}
+      {% if IS_PRODUCTION %}
+      <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-TXVKLN6');</script>
+    <!-- End Google Tag Manager -->
+
+      <!-- Global site tag (gtag.js) - Google Analytics -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=UA-115911234-1"></script>
+      <script>{% minifyjs %}
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-115911234-1');
+      {% endminifyjs %}</script>
+      {% endif %}
+
+      {% block adsense %}
+      {% comment %}
+      {% if request.is_production %}
+        <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+        <script>{% minifyjs %}
+             (adsbygoogle = window.adsbygoogle || []).push({
+                  google_ad_client: "ca-pub-9355673094386095",
+                  enable_page_level_ads: true
+             });
+        {% endminifyjs %}</script>
+      {% endif %}
+      {% endcomment %}
+      {% endblock adsense %}
+  </head>
+  <body id="page-top" class="landing-page no-skin-config pace-done {% block body-class %}{% endblock body-class %}">
+  {% if IS_PRODUCTION %}
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-TXVKLN6"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  {% endif %}
+    {% block body-top %}{% endblock body-top %}
+    <div id="wrapper">
+    <div class="row border-bottom">
+        <nav class="navbar navbar-static-top" role="navigation">
+            <div class="nav-container">
+                <div class="navbar-header page-scroll">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="/" alt="pricecray.com">&nbsp;</a>
+                </div>
+
+                <div id="navbar" class="navbar-collapse collapse">
+                    {% block menu %}
+                      {% cache 86400 nav_menu using="memcache" %}
+                        {% nav_menu template_name="home/tags/top_menu.html" parent=site.root_page calling_page=self %}
+                      {% endcache %}
+                    {% endblock menu %}
+                </div>
+            </div>
+        </nav>
+    </div>
+
+    {% wagtailuserbar 'bottom-right' %}
+    
+    <div id="main-content">
+      {% block content %}{% endblock content %}
+    </div>
+    {% block content-bottom %}{% endblock content-bottom %}
+    
+      <div class="footer footer-bottom">
+
+            <div class="row">
+              <div class="col-lg-12">
+                <ul class="nav nav-pills nav-footer">
+                    <li {% if '/about' in request.path %}class="active"{% endif %}><a href="/about/">About</a></li>
+                    <li {% if '/privacy-policy' in request.path %}class="active"{% endif %}><a href="/privacy-policy/">Privacy Policy</a></li>
+                    <li><a href="https://twitter.com/pricecray/"><i class="fa fa-twitter"></i> Twitter</a></li>
+                    <li><a href="https://www.facebook.com/pricecray/"><i class="fa fa-facebook"></i> Facebook</a></li>
+                </ul>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-lg-12">
+                <p class="text-warning m-b-sm">
+                  pricecray.com uses the Amazon Affiliates Program to earn advertising fees by linking to Amazon.com.<br/>
+                  Product prices are subject to change and are accurate to specified time. Prices, availability and other fees may apply during purchase time at Amazon.com.
+                </p>
+                <p>
+                  Copyright © {% now 'Y' %} pricecray.com.
+                </p>
+              </div>
+            </div>
+
+      </div> <!-- footer-bottom -->
+    </div>
+
+    {% compress js %}
+    <!-- Mainly scripts -->
+    <script src="{% static 'home/js/jquery-3.1.1.min.js' %}"></script>
+    <script src="{% static 'home/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'home/js/plugins/metisMenu/jquery.metisMenu.js' %}"></script>
+    <script src="{% static 'home/js/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="{% static 'home/js/inspinia.js' %}"></script>
+    <script src="{% static 'home/js/plugins/pace/pace.min.js' %}"></script>
+    <script src="{% static 'home/js/plugins/wow/wow.min.js' %}"></script>
+
+    <!-- slick carousel-->
+    <script src="{% static 'home/js/plugins/slick/slick.min.js' %}"></script>
+
+    <script type="text/javascript" src="{% static 'home/libs/cookieconsent2/3.1.0/cookieconsent.min.js' %}">"></script>
+    <script type="text/javascript" src="{% static 'home/libs/jquery.lazy/1.7.9/jquery.lazy.min.js' %}">"></script>
+    <script type="text/javascript" src="{% static 'home/libs/jquery.lazy/1.7.9/jquery.lazy.plugins.min.js' %}">"></script>
+    {% endcompress %}
+
+    <script>{% minifyjs %}
+        $(document).ready(function(){
+            $('.product-images').slick({
+                dots: true
+            });
+
+            $('.lazy').Lazy();
+
+            $('.search-form').submit(function(ev){
+              var query = $('.search-form input').eq(0).val();
+              if (query.indexOf('amazon.com') !== -1) {
+                var matchArray = query.match(/\/([A-Z0-9]+)\//);
+                var code = ''
+                if (matchArray.length == 2) {
+                  code = matchArray[1];
+                }
+                if (code != '') {
+                  console.log(code);
+                  $('.search-form input').eq(0).val(code);
+                }
+              }
+            });
+        });
+    {% endminifyjs %}</script>
+    <script type="application/ld+json">
+    {% minifyjs %}{
+        "@context": "http://schema.org",
+        "@type": "Organization",
+        "name": "PriceCray",
+        "url": "https://www.pricecray.com",
+        "logo": "https://www.pricecray.com{% static 'home/img/pricecray_logo_solo_wh_512.png' %}",
+        "sameAs": [
+          "https://www.facebook.com/pricecray",
+          "https://twitter.com/pricecray"
+        ]
+      }{% endminifyjs %}
+      </script>
+    {% block script-bottom %}{% endblock script-bottom %}
+
+    {% comment %}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/3.1.0/cookieconsent.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery.lazy/1.7.9/jquery.lazy.min.js"></script>
+    <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/jquery.lazy/1.7.9/jquery.lazy.plugins.min.js"></script>
+    {% endcomment %}
+
+    <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-5c86a0dd97df12f4"></script>
+
+    <script>{% minifyjs %}
+    window.addEventListener("load", function(){
+    window.cookieconsent.initialise({
+      "palette": {
+        "popup": {
+          "background": "#333745"
+        },
+        "button": {
+          "background": "#fdae35"
+        }
+      },
+      "position": "bottom-right"
+    })});
+    {% endminifyjs %}</script>
+  </body>
+</html>{% endspaceless %}
+{% block page-bottom %}<!-- Rendered: {% now 'j M, Y H:i:s' %} -->{% endblock page-bottom %}

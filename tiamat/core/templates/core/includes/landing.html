@@ -1,0 +1,424 @@
+{% load static wagtailcore_tags wagtailimages_tags wagtailbase_tags wagtailembeds_tags   %}
+
+{% if body %}
+
+    {% for child in body %}
+        {% if child.block_type == 'h2' %}
+            <h2>{{ child }}</h2>
+        {% elif child.block_type == 'h3' %}
+            <h3>{{ child }}</h3>
+        {% elif child.block_type == 'h4' %}
+            <h4>{{ child }}</h4>
+        {% elif child.block_type == 'aligned_image' %}
+          <figure class="photo-{{ child.value.alignment }}">
+            {% image child.value.image original as photo %}
+            <img src="{{ photo.url }}" alt="{{ child.value.caption }}" />
+            {% if child.value.caption %}
+            <figcaption>
+              {{ child.value.caption }}
+            </figcaption>
+            {% endif %}
+          </figure>
+        {% elif child.block_type == 'raw_html' %}
+            {{ child.value|safe }}
+        {% elif child.block_type == 'embed' %}
+            <section class="services">
+                <div class="row">
+                    <div class="col-lg-12 text-center">
+                        <div style="max-width: 800px;margin:0 auto;">
+                            {% embed child.value.url 800 %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+        {% elif child.block_type == 'feature_slider' %}
+
+            <div id="{{ child.value.section_id }}" class="{{ child.value.section_classes }} carousel carousel-fade" data-ride="carousel">
+                {% if child.value.features|length > 1 %}
+                <ol class="carousel-indicators">
+                    <li data-target="#{{ child.value.section_id }}" data-slide-to="0" class="active"></li>
+                    <li data-target="#{{ child.value.section_id }}" data-slide-to="1"></li>
+                </ol>
+                {% endif %}
+                <div class="carousel-inner" role="listbox">
+                    {% for feature in child.value.features %}
+                    <div class="item {% if forloop.first %}active{% endif %}">
+                        <div class="container">
+                            <div class="carousel-caption">
+                                <h1>{{ feature.title|linebreaksbr }}</h1>
+                                <p>{{ feature.subtitle }}</p>
+
+                                {% if feature.enter_email %}
+                                    <div class="jumbotron">
+                                        <h3 style="color:#676a6c;text-shadow:none;">{{ feature.enter_email_intro }}</h3>
+                                        <form method="post" action="{% pageurl self %}">{% csrf_token %}
+                                            <div class="form-group">
+                                                <input type="email" class="form-control" id="id_email" placeholder="{{ feature.field_placeholder }}" name="email" style="color:#676a6c;" />
+                                            </div>
+                                            {% if email_submitted %}
+                                                {% if feature.success_message_emphasis or feature.success_message %}
+                                                <div class="alert alert-success" role="alert" style="color:#676a6c;text-shadow:none;">
+                                                  <strong>{{ feature.success_message_emphasis }}</strong> {{ feature.success_message }}
+                                                </div>
+                                                {% endif %}
+                                            {% endif %}
+                                            <button type="submit" class="btn btn-success">{{ feature.enter_email_button_text }}</button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+
+                                {% if feature.show_action_button %}
+                                <p>
+                                    <a class="btn btn-lg btn-primary" href="{{ feature.button_url }}" role="button">{{ feature.button_text }}</a>
+                                    {% if feature.caption_link and feature.caption_text %}<a class="caption-link" href="{{ feature.caption_link }}" role="button">{{ feature.caption_text }}</a>{% endif %}
+                                </p>
+                                {% endif %}
+                            </div>
+                            {% if feature.overlay_image %}
+                            <div class="carousel-image wow zoomIn">
+                                {% image feature.overlay_image original as overlay %}
+                                <div style="position:absolute; right:{{ feature.overlay_position_right|default:"0" }}px;top:{{ feature.overlay_position_top|default:"0" }}px;">
+                                    <img src="{{ overlay.url }}" alt="{{ overlay.caption }}"/>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <!-- Set background for slide in css -->
+                        {% image feature.image original as photo %}
+                        <div class="header-back" style="background:url({{ photo.url }}) no-repeat left bottom fixed; background-size: cover;"></div>
+
+                    </div>
+                    {% endfor %}
+                </div>
+                {% if child.value.features|length > 1 %}
+                <a class="left carousel-control" href="#{{ child.value.section_id }}" role="button" data-slide="prev">
+                    <span class="glyphicon glyphicon-chevron-left" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="right carousel-control" href="#{{ child.value.section_id }}" role="button" data-slide="next">
+                    <span class="glyphicon glyphicon-chevron-right" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+                {% endif %}
+            </div>
+
+        {% elif child.block_type == 'text_feature_row' %}
+
+            <section id="{{ child.value.section_id }}" class="{{ child.value.section_classes }} services">
+                <div class="row">
+                    {% for feature in child.value.paragraphs %}
+                    <div class="col-sm-3">
+                        <h2>{{ feature.title }}</h2>
+                        {{ feature.text }}
+                        {% if feature_link_url %}
+                        <p><a class="navy-link" href="{{ feature_link_url }}" role="button">{{ feature.link_text }} &raquo;</a></p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+        {% elif child.block_type == 'center_image_feature' %}
+
+            <section id="{{ child.value.section_id }}" class="features {{ child.value.section_classes }}">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <div class="navy-line"></div>
+                            <h1>{{ child.value.title }}<br/> <span class="navy"> {{ child.value.emphasis_title }}</span> </h1>
+                            <p>{{ child.value.subtitle }} </p>
+                        </div>
+                    </div>
+                    <div class="row features-block">
+                        <div class="col-md-{% if child.value.image %}3{% else %}4 col-lg-offset-2{% endif %} {% if feature.highlight_tag %}features-text{% else %}text-center{% endif %} wow fadeInLeft">
+                            {% for feature in child.value.features_left %}
+                            <div {% if forloop.last %}class="m-t-lg"{% endif %}>
+                                {% if feature.icon %}
+                                <i class="fa fa-{{ feature.icon }} features-icon"></i>
+                                {% endif %}
+                                <h2>{{ feature.title }}</h2>
+                                {{ feature.text|linebreaks }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% if child.value.image %}
+                        <div class="col-md-6 text-center wow zoomIn">
+                            {% image child.value.image original as photo %}
+                            <img src="{{ photo.url }}" alt="{{ photo.title }}" title="{{ photo.title }}" class="img-responsive" style="margin: auto;">
+                        </div>
+                        {% endif %}
+                        <div class="col-md-{% if child.value.image %}3{% else %}4{% endif %} {% if feature.highlight_tag %}features-text text-right{% else %}text-center{% endif %}  wow fadeInRight">
+                            {% for feature in child.value.features_right %}
+                            <div {% if forloop.last %}class="m-t-lg"{% endif %}>
+                                {% if feature.icon %}
+                                <i class="fa fa-{{ feature.icon }} features-icon"></i>
+                                {% endif %}
+                                <h2>{{ feature.title }}</h2>
+                                {{ feature.text|linebreaks }}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        {% elif child.block_type == 'stacked_feature_list' %}
+
+            <section id="{{ child.value.section_id }}" class="features {{ child.value.section_classes }}">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <div class="navy-line"></div>
+                            <h1>{{ child.value.title }}</h1>
+                            <p>{{ child.value.subtitle }}</p>
+                        </div>
+                    </div>
+                    {% for feature in child.value.features %}
+                    <div class="row features-block">
+                        <div class="col-lg-6 features-text wow fadeInLeft">
+                            <small>{{ feature.highlight_tag }}</small>
+                            <h2>{{ feature.title }}</h2>
+                            {{ feature.text|linebreaks }}
+                            {% if feature.link_url and feature.link_text %}
+                            <a href="{{ feature.link_url }}" class="btn btn-primary">{{ feature.link_text }}</a>
+                            {% endif %}
+                        </div>
+                        {% if feature.image %}
+                        <div class="col-lg-6 text-right wow fadeInRight">
+                            {% image feature.image original as photo %}
+                            <img src="{{ photo.url }}" alt="{{ photo.title }}" title="{{ photo.title }}" class="img-responsive pull-right">
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+        {% elif child.block_type == 'portrait_item_row' %}
+
+            <section id="{{ child.value.section_id }}" class="{{ child.value.section_classes }} team">
+                <div class="container">
+                    <div class="row m-b-lg">
+                        <div class="col-lg-12 text-center">
+                            <div class="navy-line"></div>
+                            <h1>{{ child.value.title }}</h1>
+                            <p>{{ child.value.subtitle }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        {% if child.value.items|length == 1 %}
+                        <div class="col-sm-4"></div>
+                        {% endif %}
+                        {% for item in child.value.items %}
+                        <div class="col-sm-4 {% if forloop.counter == 1 %}wow fadeInLeft{% elif forloop.counter == 3 %}wow fadeInRight{% endif %}">
+                            <div class="team-member {% if forloop.counter == 2 %}wow zoomIn{% endif %}">
+                                {% if item.image %}
+                                {% image item.image original as photo %}
+                                    <img src="{{ photo.url }}" class="img-responsive img-circle" width="200" height="200" style="border: 10px solid #e5e6e5;">
+                                {% endif %}
+                                <h4>{{ item.title }}</h4>
+                                {{ item.text|linebreaks }}
+                                {% if item.email %}
+                                    <a href="mailto:{{ item.email }}" class="btn btn-primary btn-sm btn-block"><i class="fa fa-envelope"></i> {{ item.email }}</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                        {% if child.value.items|length == 1 %}
+                        <div class="col-sm-4"></div>
+                        {% endif %}
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-8 col-lg-offset-2 text-center m-t-lg m-b-lg">
+                            {{ child.value.footer_text|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        {% elif child.block_type == 'testimonial_list' %}
+            <section id="{{ child.value.section_id }}" class="{{ child.value.section_classes }} comments" style="margin-top: 0">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <div class="navy-line"></div>
+                            <h1>{{ child.value.title }}</h1>
+                            <p>{{ child.value.subtitle }}</p>
+                        </div>
+                    </div>
+                    <div class="row features-block">
+                        {% for item in child.value.items %}
+                        <div class="col-lg-4">
+                            <div class="bubble">
+                                "{{ item.text }}"
+                            </div>
+                            <div class="comments-avatar">
+                                <a href="" class="pull-left">
+                                    {% image item.image original as photo %}
+                                    <img alt="image" src="{{ photo.url }}">
+                                </a>
+                                <div class="media-body">
+                                    <div class="commens-name">
+                                        {{ item.name }}
+                                    </div>
+                                    <small class="text-muted">{{ item.position }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+            </section>
+        {% elif child.block_type == 'grid_feature_list' %}
+
+            <section id="{{ child.value.section_id }}" class="{{ child.value.section_classes }} features">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <div class="navy-line"></div>
+                            <h1>{{ child.value.title }}</h1>
+                            <p>{{ child.value.subtitle }}</p>
+                        </div>
+                    </div>
+                    {% for item in child.value.items %}
+                    {% if forloop.counter|divisibleby:2 %}
+                    <div class="row">
+                    {% endif %}
+                        <div class="col-lg-5 col-lg-offset-1 features-text">
+                            <small>{{ item.highlight_tag }}</small>
+                            <h2>{{ item.title }}</h2>
+                            <i class="fa fa-{{ item.fa_icon }} big-icon pull-right"></i>
+                            {{ item.text|linebreaks }}
+                        </div>
+                    {% if forloop.counter|divisibleby:2 %}
+                    </div>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+
+            </section>
+
+        {% elif child.block_type == 'highlight_text' %}
+            {% if child.value.image %}
+            {% image child.value.image original as photo %}
+            {% endif %}
+            <section id="{{ child.value.section_id }}" class="{{ child.value.section_classes }}" style="margin-top:0; padding-top: 80px; padding-bottom: 90px; {% if child.value.image %}background-image: url({{ photo.url }}){% endif %}">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-lg-2"></div>
+                        <div class="col-lg-8 text-center wow zoomIn">
+                            <i class="fa fa-{{ child.value.fa_icon }} big-icon"></i>
+                            <h1>
+                                {{ child.value.title }}
+                            </h1>
+                            <div class="text-left">
+                                {{ child.value.text|linebreaks }}
+                            </div>
+                            <small>
+                                <strong>{{ child.value.caption }}</strong>
+                            </small>
+                        </div>
+                        <div class="col-lg-2"></div>
+                    </div>
+                </div>
+
+            </section>
+
+        {% elif child.block_type == 'pricing_plan_list' %}
+
+            <section id="{{ child.value.section_id }}" class="{{ child.value.section_classes }} pricing">
+                <div class="container">
+                    <div class="row m-b-lg">
+                        <div class="col-lg-12 text-center">
+                            <div class="navy-line"></div>
+                            <h1>{{ child.value.title }}</h1>
+                            <p>{{ child.value.subtitle }}</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        {% for plan in child.value.items %}
+                        <div class="col-lg-4 wow zoomIn">
+                            <ul class="pricing-plan list-unstyled {% if forloop.counter == 2 %}selected{% endif %}">
+                                <li class="pricing-title">
+                                    {{ plan.title }}
+                                </li>
+                                <li class="pricing-desc">
+                                    {{ plan.description }}
+                                </li>
+                                <li class="pricing-price">
+                                    <span>{{ plan.price }}</span> {{ plan.payment_period }}
+                                </li>
+                                {% for feat in plan.items %}
+                                <li>
+                                    {{ feat.text }}
+                                </li>
+                                {% endfor %}
+                                <li>
+                                    <a class="btn btn-primary btn-xs" href="{{ plan.signup_link }}">{{ plan.signup_text }}</a>
+                                </li>
+                            </ul>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="row m-t-lg">
+                        <div class="col-lg-8 col-lg-offset-2 text-center m-t-lg">
+                            {{ child.value.footer_text|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+
+            </section>
+
+        {% elif child.block_type == 'contact_us_section' %}
+
+            <section id="{{ child.value.section_id }}" class="{{ child.value.section_classes }} contact">
+                <div class="container">
+                    <div class="row m-b-lg">
+                        <div class="col-lg-12 text-center">
+                            <div class="navy-line"></div>
+                            <h1>{{ child.value.title }}</h1>
+                            <p>{{ child.value.subtitle }}</p>
+                        </div>
+                    </div>
+                    <div class="row m-b-lg">
+                        <div class="col-lg-3 col-lg-offset-3">
+                            <address>
+                                <strong><span class="navy">{{ child.value.name }}</span></strong><br/>
+                                {{ child.value.address|linebreaksbr }}
+                                <br/>
+                                <abbr title="Phone">P:</abbr> {{ child.value.phone }}
+                            </address>
+                        </div>
+                        <div class="col-lg-4">
+                            {{ child.value.text|linebreaks }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-12 text-center">
+                            <a href="mailto:{{ child.value.email }}" class="btn btn-primary">{{ child.value.mail_button_text }}</a>
+                            <p class="m-t-sm">
+                                {{ child.value.social_text }}
+                            </p>
+                            <ul class="list-inline social-icon">
+                                {% for network in child.value.social %}
+                                <li><a href="{{ network.link }}"><i class="fa fa-{{ network.network }}"></i></a>
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-lg-8 col-lg-offset-2 text-center m-t-lg m-b-lg">
+                            <p><strong>&copy; {% now 'Y' %} {{ child.value.name }}</strong><br/> {{ child.value.footer_text|linebreaksbr }}</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        {% else %}
+            {{ child }}
+        {% endif %}
+    {% endfor %}
+
+{% endif %}

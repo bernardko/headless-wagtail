@@ -1,0 +1,17 @@
+{% load core_tags wagtailcore_tags %}
+<ul>
+    {% for menuitem in menuitems %}
+        {% if menuitem.show_dropdown %}
+
+        <li class="dropdown {% if menuitem.url in request.get_full_path %}current{% endif %}">
+            <a href="{% if menuitem.specific.link %}{{ menuitem.specific.link }}{% else %}{% pageurl menuitem %}{% endif %}">{{ menuitem.specific.menu_title }}<span class="arrow-down"></span></a>
+            {% top_menu_children parent=menuitem %}
+        </li>
+
+        {% else %}
+
+            <li {% if menuitem.url == request.get_full_path %}class="current"{% endif %}><a href="{% if menuitem.specific.link %}{{ menuitem.specific.link }}{% else %}{% pageurl menuitem %}{% endif %}">{{ menuitem.specific.menu_title }}<span></span></a></li>
+
+        {% endif %}
+    {% endfor %}
+</ul>

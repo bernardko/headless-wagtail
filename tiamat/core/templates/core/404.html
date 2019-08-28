@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% load static core_tags wagtailcore_tags wagtailimages_tags pagination_tags home_tags wagtailroutablepage_tags cache  %}
+
+{% block title %}Page Not Found{% endblock title %}
+{% block description %}{% endblock description %}
+
+{% block head %}{% endblock head %}
+
+{% block body-top %}{% endblock body-top %}
+
+{% block body-class %}gray-bg{% endblock body-class %}
+
+{% block content %}
+    <div class="middle-box text-center animated fadeInDown" style="margin-bottom:180px;">
+        <h1>404</h1>
+        <h3 class="font-bold">Page Not Found</h3>
+
+        <div class="error-desc">
+            Sorry, this page can't be found. Try using our search to find Amazon products or try clicking on our logo to return to the front page.
+            <form class="search-form form-inline m-t" role="form" action="/search/" method="get">
+                <div class="form-group">
+                    <input type="text" placeholder="Search Amazon page address, ASIN or keywords" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Search for page">
+                </div>
+                <button type="submit" class="btn btn-primary">Search</button>
+            </form>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block body-bottom %}{% endblock body-bottom %}

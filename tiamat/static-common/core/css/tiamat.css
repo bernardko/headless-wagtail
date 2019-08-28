@@ -1,0 +1,60 @@
+.landing-page .navy-line-left {
+    width: 60px;
+    height: 1px;
+    margin: 60px 0 0 0;
+    border-bottom: 2px solid #1ab394;
+}
+.landing-page h1 {
+    font-size: 45px;
+}
+.landing-page .features h2 {
+    font-size: 30px;
+}
+.landing-page .article h2 {
+    margin-top: 30px;
+    font-size: 30px;
+}
+.landing-page .article h2.tag {
+    margin-top: 0;
+}
+.landing-page .article h2.line {
+    margin-top: 10px;
+}
+.landing-page section p {
+    color: #aeaeae;
+    font-size: 18px;
+}
+.landing-page .bubble {
+    height: auto;
+    font-size: 18px;
+}
+.no-vote {
+    margin-left: 0px;
+}
+#header {
+    margin-top: 80px;
+    margin-bottom: 20px;
+}
+.landing-page .jumbotron p {
+    color: #676a6c;
+    font-size: 25px;
+}
+.landing-page .vote-item {
+    border-top: 0px;
+    padding-left: 0px;
+}
+.landing-page .vote-title {
+    font-size: 22px;
+}
+.landing-page .vote-item:last-child {
+    border-bottom: 0px;
+}
+.landing-page .vote-icon {
+    text-align: middle;
+}
+.landing-page .pagination {
+    margin-top: 25px;
+}
+vote-info, .vote-info a {
+    font-size: 14px;
+}

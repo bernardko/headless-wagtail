@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% load static core_tags wagtailcore_tags wagtailimages_tags pagination_tags home_tags wagtailroutablepage_tags cache  %}
+
+{% block title %}Server Error{% endblock title %}
+{% block description %}{% endblock description %}
+
+{% block head %}{% endblock head %}
+
+{% block body-top %}{% endblock body-top %}
+
+{% block body-class %}gray-bg{% endblock body-class %}
+
+{% block content %}
+    <div class="middle-box text-center animated fadeInDown" style="margin-bottom:180px;">
+        <h1>500</h1>
+        <h3 class="font-bold">Server Error</h3>
+
+        <div class="error-desc">
+            Sorry, the server has encountered an error. This is usually temporary, try returning to the home page.
+            <br/>
+            <a href="" class="btn btn-primary m-t">Return to Home Page</a>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block body-bottom %}{% endblock body-bottom %}

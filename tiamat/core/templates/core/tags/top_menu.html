@@ -1,0 +1,45 @@
+{% load core_tags wagtailcore_tags %}
+<ul class="nav navbar-nav">
+    <li>
+      <form class="search-form" role="search" action="/search/">
+        <div class="input-group">
+          <input type="search" alt="Search Amazon page address, ASIN or keywords" placeholder="Search Amazon page address, ASIN or keywords" name="q" value="{{ request.GET.q }}" class="form-control" style="border-top-left-radius: 10px; border-bottom-left-radius: 10px">
+          <span class="input-group-btn">
+            <button type="submit" title="Go!" class="btn btn-primary" style="border-top-right-radius: 10px; border-bottom-right-radius: 10px; padding:6px 10px;"><i class="fa fa-search"></i></button>
+          </span>
+        </div>
+
+      </form>
+    </li>
+    {% for menuitem in menuitems %}
+        {% if menuitem.show_dropdown %}
+
+            <li class="dropdown dropdown-lg {% if menuitem.specific.link == request.get_full_path %}active{% endif %}">
+                <a class="page-scroll dropdown-toggle" data-toggle="dropdown" href="{% if menuitem.specific.link %}{{ menuitem.specific.link }}{% else %}{% pageurl menuitem %}{% endif %}">{{ menuitem.specific.menu_title }}<b class="caret"></b></a>
+                {% top_menu_children parent=menuitem calling_page=self %}
+            </li>
+
+        {% else %}
+
+            <li class="{% if menuitem.specific.link == request.get_full_path %}active{% endif %}"><a class="top-nav" href="{% if menuitem.specific.link %}{{ menuitem.specific.link }}{% else %}{% pageurl menuitem %}{% endif %}">{{ menuitem.specific.menu_title }}<span></span></a></li>
+
+        {% endif %}
+    {% endfor %}
+
+    {% comment %}
+    <li>
+        <script>
+            (function() {
+              var cx = '015111864679044148456:4fa8no0gkpo';
+              var gcse = document.createElement('script');
+              gcse.type = 'text/javascript';
+              gcse.async = true;
+              gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
+              var s = document.getElementsByTagName('script')[0];
+              s.parentNode.insertBefore(gcse, s);
+            })();
+          </script>
+          <gcse:search enableAutoComplete="true"></gcse:search>
+    </li>
+    {% endcomment %}
+</ul>

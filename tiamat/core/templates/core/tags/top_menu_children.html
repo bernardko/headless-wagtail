@@ -1,0 +1,51 @@
+{% load core_tags wagtailcore_tags %}
+
+<ul class="dropdown-menu dropdown-menu-lg row">
+	<li class="col-sm-4">
+        <ul>
+            <li><a class="dropdown-header" href="{% pageurl parent %}">{{ parent.specific.menu_title }}</a></li>
+		    {% for child in menuitems_children|slice:":5" %}
+	            <li><a href="{% pageurl child %}">{{ child.specific.menu_title }}</a></li>
+			{% endfor %}
+        </ul>
+    </li>
+    {% if menuitems_children|length > 5 %}
+    <li class="col-sm-4 m-t-lg">
+        <ul>
+            {% for child in menuitems_children|slice:"5:10" %}
+                <li><a href="{% pageurl child %}">{{ child.specific.menu_title }}</a></li>
+            {% endfor %}
+        </ul>
+    </li>
+    {% endif %}
+    {% if menuitems_children|length > 10 %}
+    <li class="col-sm-4 m-t-lg">
+        <ul>
+            {% for child in menuitems_children|slice:"10:15" %}
+                <li><a href="{% pageurl child %}">{{ child.specific.menu_title }}</a></li>
+            {% endfor %}
+        </ul>
+    </li>
+    {% endif %}
+
+		{% comment %}
+	            <li><a href="#">Available glyphs</a></li>
+	            <li class="disabled"><a href="#">How to use</a></li>
+	            <li><a href="#">Examples</a></li>
+	            <li class="divider"></li>
+	            <li class="dropdown-header">Dropdowns</li>
+	            <li><a href="#">Example</a></li>
+	            <li><a href="#">Aligninment options</a></li>
+	            <li><a href="#">Headers</a></li>
+	            <li><a href="#">Disabled menu items</a></li>
+
+
+        {% if child.show_dropdown and not end %}
+        	<li class="inner"><a href="{% pageurl child %}">{{ child.specific.menu_title }}</a></li>
+        	{% top_menu_children parent=child calling_page=self end=True %}
+        {% else %}
+        	<li><a href="{% pageurl child %}">{{ child.specific.menu_title }}</a></li>
+        {% endif %}
+        {% endcomment %}
+
+</ul>
