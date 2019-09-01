@@ -63,6 +63,7 @@ class StreamFieldSerialiser:
                 'id': value.id,
                 'alt': value.title,
                 'src': settings.MEDIA_PREFIX + value.file.url,
+                'credit': value.credit,
                 'hash': value.get_file_hash()
             }
             
