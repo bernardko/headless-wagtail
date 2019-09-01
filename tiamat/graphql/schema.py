@@ -126,22 +126,40 @@ class AuthorObjectType(graphene.ObjectType):
     intro = graphene.String()
     description = graphene.String()
 
+class BreadcrumbObjectType(graphene.ObjectType):
+    menu_title = graphene.String()
+    link_url = graphene.String()
+
+    def resolve_menu_title(self, info, **kwargs):
+        return self.specific.menu_title
+
+    def resolve_link_url(self, info, **kwargs):
+        return self.get_url(current_site=info.context.site)
+
 class LandingPageObjectType(graphene.ObjectType):
     intro = graphene.String()
     author = graphene.Field(AuthorObjectType)
+    breadcrumbs = graphene.List(BreadcrumbObjectType)
     body = StreamField()
-
+    
     class Meta:
         interfaces = [PageInterface]
         
     def resolve_author(self, info, **kwargs):
         return self.author
 
+    def resolve_breadcrumbs(self, info, **kwargs):
+        return self.get_ancestors()[1:]
+
 class CategoryPageObjectType(graphene.ObjectType):
     intro = graphene.String()
+    breadcrumbs = graphene.List(BreadcrumbObjectType)
     body = StreamField()
     num_per_page = graphene.Int()
     landing_pages = graphene.List(LandingPageObjectType, search=graphene.String(), first=graphene.Int(),skip=graphene.Int())
+
+    def resolve_breadcrumbs(self, info, **kwargs):
+        return self.get_ancestors()[1:]
 
     def resolve_landing_pages(self, info, search=None, first=None, skip=None, **kwargs):
         qs = LandingPage.objects.in_site(info.context.site).live().public().descendant_of(self)
@@ -215,7 +233,7 @@ class Query(graphene.ObjectType):
         category_pages = CategoryPage.objects.in_site(info.context.site).live().public().order_by('title')
 
         if 'preview_token' in kwargs:
-            page = get_page_preview(LandingPage, kwargs['preview_token'])
+            page = get_page_preview(CategoryPage, kwargs['preview_token'])
             if page:
                 return [page]
             else:

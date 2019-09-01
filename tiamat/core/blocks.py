@@ -169,6 +169,9 @@ class ThemeHeaderBlock(BaseBlock):
     title = CharBlock(icon="title", classname="title")
     text = TextBlock()
 
+class DefaultHeaderBlock(BaseBlock):
+    tag = CharBlock(required=False)
+
 # Column Blocks
 
 class TaggedH2Block(StructBlock):
@@ -201,6 +204,7 @@ class ColumnBlock(StructBlock):
 
 class LandingBlock(StreamBlock):
     theme_header = ThemeHeaderBlock()
+    default_header = DefaultHeaderBlock()
     feature_slider = FeatureSliderBlock()
     text_feature_row = TextFeatureRowBlock()
     center_image_feature = CenterImageFeatureBlock()
