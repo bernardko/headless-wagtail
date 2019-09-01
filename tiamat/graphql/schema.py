@@ -57,6 +57,7 @@ class ImageObjectType(graphene.ObjectType):
     rendition = graphene.Field(ImageRenditionObjectType, format=graphene.String())
     width = graphene.Int()
     height = graphene.Int()
+    credit = graphene.String()
 
     def resolve_alt(self, info):
         return self.title

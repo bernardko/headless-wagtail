@@ -191,6 +191,8 @@ class Staging(Common):
     #     ('HTTP_X_FORWARDED_PROTO', 'https')
     # )
 
+    DEBUG = True
+
     ALLOWED_HOSTS = ['*']
 
     MEDIA_PREFIX = "http://artoria:8002"
