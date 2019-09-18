@@ -8,10 +8,16 @@ from graphene_django.views import GraphQLView
 from wagtail.admin import urls as wagtailadmin_urls
 from wagtail.documents import urls as wagtaildocs_urls
 from wagtail.core import urls as wagtail_urls
+from wagtail.images.views.serve import ServeView
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('graphql/', csrf_exempt(GraphQLView.as_view(graphiql=True))),
+
+    #re_path(r'^graphql', csrf_exempt(GraphQLView.as_view())),
+    #re_path(r'^graphiql', csrf_exempt(GraphQLView.as_view(graphiql=True, pretty=True))),
+    #re_path(r'^images/([^/]*)/(\d*)/([^/]*)/[^/]*$', ServeView.as_view(), name='wagtailimages_serve'),
 
     re_path(r'^cms/', include(wagtailadmin_urls)),
     re_path(r'^documents/', include(wagtaildocs_urls)),

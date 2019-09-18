@@ -1,14 +1,19 @@
 # Borrowed from wagtail-torchbox
+import json
+import graphene
+
+from collections import namedtuple
 
 from django.conf import settings
-
-import graphene
 from graphene.types import Scalar
 from graphql.validation.rules import NoUnusedFragments, specified_rules
+from graphene_django.converter import convert_django_field
+from graphene_django import DjangoObjectType
 from wagtail.contrib.redirects.models import Redirect
 from wagtail.core.models import Page
+from wagtail_graphql.types.streamfield import convert_stream_field
 
-from .streamfield import StreamFieldSerialiser
+from .streamfield import StreamFieldSerialiser, StreamFieldBuilder, Block, DefaultStreamBlock, create_stream_field_type
 from .utils import serialize_rich_text
 
 from tiamat.core.models import CoreImage, LandingPage, CategoryPage
@@ -17,6 +22,69 @@ specified_rules[:] = [
     rule for rule in specified_rules
     if rule is not NoUnusedFragments
 ]
+
+def _json_object_hook(d):
+    return namedtuple('X', d.keys())(*d.values())
+
+def json2obj(data):
+    return json.loads(data, object_hook=_json_object_hook)
+
+@convert_django_field.register(CoreImage)
+def convert_image(field, registry=None):
+    return WagtailImageNode(
+        description=field.help_text, required=not field.null
+    )
+
+class WagtailImageRendition(graphene.ObjectType):
+    id = graphene.ID()
+    url = graphene.String()
+    width = graphene.Int()
+    height = graphene.Int()
+
+
+class WagtailImageRenditionList(graphene.ObjectType):
+    rendition_list = graphene.List(WagtailImageRendition)
+    src_set = graphene.String()
+
+    def resolve_src_set(self, info):
+        return ", ".join(
+            [f"{img.url} {img.width}w" for img in self.rendition_list])
+
+
+class WagtailImageNode(DjangoObjectType):
+    class Meta:
+        model = CoreImage
+        #exclude_fields = ['tags']
+    
+    #Define all available image rendition options as arguments
+    rendition = graphene.Field(
+        WagtailImageRendition,
+        max=graphene.String(),
+        min=graphene.String(),
+        width=graphene.Int(),
+        height=graphene.Int(),
+        fill=graphene.String(),
+        format=graphene.String(),
+        bgcolor=graphene.String(),
+        jpegquality=graphene.Int()
+    )
+    rendition_list = graphene.Field(
+        WagtailImageRenditionList, sizes=graphene.List(graphene.Int))
+
+    def resolve_rendition(self, info, **kwargs):
+        filters = "|".join([f"{key}-{val}" for key, val in kwargs.items()])
+        img = self.get_rendition(filters)
+        return WagtailImageRendition(
+            id=img.id, url=img.url, width=img.width, height=img.height)
+
+    def resolve_rendition_list(self, info, sizes=[]):
+        rendition_list = [
+            WagtailImageNode.resolve_rendition(self, info, width=width)
+            for width in sizes
+        ]
+        return WagtailImageRenditionList(rendition_list=rendition_list)
+
+
 
 class RichTextString(Scalar):
     @staticmethod
@@ -74,6 +142,46 @@ class ImageObjectType(graphene.ObjectType):
 
         # TODO: Error
 
+class ImageTypeBlock(DefaultStreamBlock):
+    image = graphene.Field(ImageObjectType)
+
+    def resolve_image(self, info):
+        try:
+            return CoreImage.objects.get(id=self.image)
+        except CoreImage.DoesNotExist:
+            return None
+
+class WideImageBlock(ImageTypeBlock):
+    pass
+
+class FeatureSliderBlock(DefaultStreamBlock):
+    features = graphene.List(ImageTypeBlock)
+
+    def resolve_features(self, info, **kwargs):
+        features = []
+        for feature in self.features:
+            features.append(ImageTypeBlock(image=feature['image']))
+        return features
+
+class CenterImageFeatureBlock(ImageTypeBlock):
+    pass
+
+class StackedFeatureListBlock(DefaultStreamBlock):
+    features = graphene.List(ImageTypeBlock)
+
+    def resolve_features(self, info, **kwargs):
+        features = []
+        for feature in self.features:
+            features.append(ImageTypeBlock(image=feature['image']))
+        return features
+
+stream_field_handers = {
+    "wide_image":WideImageBlock, 
+    "feature_slider":FeatureSliderBlock, 
+    "center_image_feature":CenterImageFeatureBlock, 
+    "stacked_feature_list": StackedFeatureListBlock
+}
+
 class PageInterface(graphene.Interface):
     title = graphene.String()
     page_title = graphene.String()
@@ -119,7 +227,8 @@ class PageInterface(graphene.Interface):
 class StreamField(Scalar):
     @staticmethod
     def serialize(val):
-        return StreamFieldSerialiser().serialise_stream_block(val)
+        return val
+        #return StreamFieldSerialiser().serialise_stream_block(val)
 
 class AuthorObjectType(graphene.ObjectType):
     full_name = graphene.String()
@@ -137,25 +246,45 @@ class BreadcrumbObjectType(graphene.ObjectType):
     def resolve_link_url(self, info, **kwargs):
         return self.get_url(current_site=info.context.site)
 
-class LandingPageObjectType(graphene.ObjectType):
+class LandingPageObjectType(DjangoObjectType):
     intro = graphene.String()
     author = graphene.Field(AuthorObjectType)
     breadcrumbs = graphene.List(BreadcrumbObjectType)
-    body = StreamField()
-    
+    #body = graphene.List(StreamField)
+    (body, resolve_body) = create_stream_field_type('body', **stream_field_handers)
+
     class Meta:
+        model = LandingPage
         interfaces = [PageInterface]
-        
+
     def resolve_author(self, info, **kwargs):
         return self.author
 
     def resolve_breadcrumbs(self, info, **kwargs):
         return self.get_ancestors()[1:]
 
+    # def resolve_body(self, info, **kwargs):
+    #     stream_block_object_type, graphql_block_dict = StreamFieldBuilder().build_stream_block(self.body)
+
+    #     field = graphene.List(stream_block_object_type)
+    #     LandingPageObjectType._meta.fields.update({'body': field})
+    #     setattr(LandingPageObjectType, 'body', field)
+
+    #     blocks = StreamFieldSerialiser().serialise_stream_block(self.body)
+    #     #blocks_tuple = json2obj(json.dumps(blocks))
+    #     graphql_blocks = []
+    #     for block in blocks:
+    #         block_node_cls = graphql_block_dict[block['type']]
+    #         block_node = block_node_cls(**block['value'])
+    #         graphql_blocks.append(block_node)
+    
+    #     return graphql_blocks
+
 class CategoryPageObjectType(graphene.ObjectType):
     intro = graphene.String()
     breadcrumbs = graphene.List(BreadcrumbObjectType)
-    body = StreamField()
+    #body = StreamField()
+    (body, resolve_body) = create_stream_field_type('body', **stream_field_handers)
     num_per_page = graphene.Int()
     landing_pages = graphene.List(LandingPageObjectType, search=graphene.String(), first=graphene.Int(),skip=graphene.Int())
 
@@ -163,7 +292,7 @@ class CategoryPageObjectType(graphene.ObjectType):
         return self.get_ancestors()[1:]
 
     def resolve_landing_pages(self, info, search=None, first=None, skip=None, **kwargs):
-        qs = LandingPage.objects.in_site(info.context.site).live().public().descendant_of(self)
+        qs = LandingPage.objects.in_site(info.context.site).live().public().descendant_of(self).order_by('-last_published_at')
 
         if search:
             filter = (

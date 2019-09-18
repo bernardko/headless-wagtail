@@ -31,3 +31,4 @@ graphene_django = "==2.4.0"
 wagtail-markdown = {editable = true,git = "https://github.com/torchbox/wagtail-markdown.git"}
 beautifulsoup4 = "*"
 django-cors-headers = "*"
+wagtail-graphql = "*"
