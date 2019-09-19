@@ -175,11 +175,21 @@ class StackedFeatureListBlock(DefaultStreamBlock):
             features.append(ImageTypeBlock(image=feature['image']))
         return features
 
+class AuthorBlock(DefaultStreamBlock):
+    portrait = graphene.Field(ImageObjectType)
+
+    def resolve_portrait(self, info):
+        try:
+            return CoreImage.objects.get(id=self.portrait)
+        except CoreImage.DoesNotExist:
+            return None
+
 stream_field_handers = {
     "wide_image":WideImageBlock, 
     "feature_slider":FeatureSliderBlock, 
     "center_image_feature":CenterImageFeatureBlock, 
-    "stacked_feature_list": StackedFeatureListBlock
+    "stacked_feature_list": StackedFeatureListBlock,
+    "author": AuthorBlock
 }
 
 class PageInterface(graphene.Interface):
