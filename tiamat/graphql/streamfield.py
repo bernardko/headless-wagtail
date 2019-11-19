@@ -49,7 +49,13 @@ def create_stream_field_type(field_name, **kwargs):
 
     def convert_block(block):
         block_type = block.get('type')
+        # When block is not a stream block
+        if not block_type:
+            block_type = list(block_type_handlers.keys())[0]
+            block = {"type":block_type, "value":block}
+
         value = block.get('value')
+
         if block_type in block_type_handlers:
             handler = block_type_handlers.get(block_type)
             if isinstance(value, dict):
@@ -58,7 +64,6 @@ def create_stream_field_type(field_name, **kwargs):
                 for key, field in handler._meta.fields.items():
                     if key in value:
                         existing_key_dict[key] = value[key]
-
                 return handler(value=value, block_type=block_type, **existing_key_dict)
             else:
                 return handler(value=value, block_type=block_type)
@@ -68,7 +73,15 @@ def create_stream_field_type(field_name, **kwargs):
     # We also generate the resolver function for the field
     def resolve_field(self, info):
         field = getattr(self, field_name)
-        return [convert_block(block) for block in field.stream_data]
+        if hasattr(field, "stream_data"):
+            return [convert_block(block) for block in field.stream_data]
+        elif isinstance(field, list):
+            block_list = []
+            for block in field:
+                block_list.append(convert_block(block))
+            return block_list
+        else:
+            raise Exception("Invalid Field Data resolve_field:" + str(field))
 
     return (graphene.List(StreamFieldType), resolve_field)
 

@@ -163,9 +163,6 @@ class FeatureSliderBlock(DefaultStreamBlock):
             features.append(ImageTypeBlock(image=feature['image']))
         return features
 
-class CenterImageFeatureBlock(ImageTypeBlock):
-    pass
-
 class StackedFeatureListBlock(DefaultStreamBlock):
     features = graphene.List(ImageTypeBlock)
 
@@ -184,12 +181,30 @@ class AuthorBlock(DefaultStreamBlock):
         except CoreImage.DoesNotExist:
             return None
 
+class IconTextParagraphBlock(ImageTypeBlock):
+    pass
+
+class TextImageBlock(ImageTypeBlock):
+    pass
+
+column_field_handlers = {
+    "text_image": TextImageBlock,
+}
+
+class CenterImageFeatureBlock(ImageTypeBlock):
+    (features_left, resolve_features_left) = create_stream_field_type('features_left', **{"features_left": IconTextParagraphBlock})
+    (features_right, resolve_features_right) = create_stream_field_type('features_right', **{"features_right": IconTextParagraphBlock})
+
+class ColumnBlock(DefaultStreamBlock):
+    (content, resolve_content) = create_stream_field_type('content', **column_field_handlers)
+
 stream_field_handers = {
     "wide_image":WideImageBlock, 
     "feature_slider":FeatureSliderBlock, 
     "center_image_feature":CenterImageFeatureBlock, 
     "stacked_feature_list": StackedFeatureListBlock,
-    "author": AuthorBlock
+    "author": AuthorBlock,
+    "column": ColumnBlock
 }
 
 class PageInterface(graphene.Interface):

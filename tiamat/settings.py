@@ -138,7 +138,7 @@ class Common(Configuration):
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-    MEDIA_PREFIX = "http://artoria:8001"
+    MEDIA_PREFIX = "http://artoria:8000"
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     MEDIA_URL = values.Value('/media/')
 

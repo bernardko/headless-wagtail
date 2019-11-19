@@ -117,11 +117,13 @@ class TextFeatureRowBlock(BaseBlock):
 class IconTextParagraphBlock(StructBlock):
     title = CharBlock(icon="title", classname="title")
     icon = CharBlock(required=False)
+    image = ImageChooserBlock(required=False)
     text = TextBlock()
 
 class CenterImageFeatureBlock(BaseBlock):
     title = CharBlock(icon="title", classname="title")
     emphasis_title = CharBlock(required=False, icon="title", classname="title")
+    emphasis = BooleanBlock(required=False)
     subtitle = CharBlock(icon="title", classname="title")
     image = ImageChooserBlock(required=False)
 
@@ -145,8 +147,9 @@ class HighlightTextBlock(BaseBlock):
     fa_icon = CharBlock(required=False)
     image = ImageChooserBlock(required=False)
     title = CharBlock(icon="title", classname="title")
-    text = TextBlock()
-    caption = CharBlock(required=False)
+    text = TextBlock(required=False)
+    button_text = CharBlock(required=False)
+    button_url = URLBlock(required=False)
 
 class AuthorBlock(BaseBlock):
     title = CharBlock(icon="title", classname="title")
@@ -182,14 +185,28 @@ class LineH2Block(StructBlock):
     title = CharBlock(icon="title", classname="title")
 
 class H2Block(StructBlock):
+    align_center = BooleanBlock(required=False)
     show_line = BooleanBlock(required=False)
     tag = CharBlock(required=False)
+    fa_icon = CharBlock(required=False)
+    emoji = CharBlock(required=False)
     title = CharBlock(icon="title", classname="title")
+    emphasis = BooleanBlock(required=False)
 
 class ActionButtonBlock(StructBlock):
+    align_center = BooleanBlock(required=False)
     description = TextBlock()
     button_text = CharBlock()
     button_url = URLBlock()
+
+class TextImageBlock(StructBlock):
+    image = ImageChooserBlock(required=True)
+    image_col_size = IntegerBlock(default=4)
+    align_image_left = BooleanBlock(required=False)
+    text = RichTextBlock()
+
+class SummaryBlock(StructBlock):
+    text = RichTextBlock()
 
 class ColumnContentBlock(StreamBlock):
     h2 = H2Block()
@@ -197,6 +214,8 @@ class ColumnContentBlock(StreamBlock):
     line_h2 = LineH2Block()
     rich_text = RichTextBlock()
     action_button = ActionButtonBlock()
+    text_image = TextImageBlock()
+    summary = SummaryBlock()
 
 class ColumnBlock(StructBlock):
     columns = IntegerBlock()
