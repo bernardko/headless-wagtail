@@ -149,7 +149,7 @@ class HighlightTextBlock(BaseBlock):
     title = CharBlock(icon="title", classname="title")
     text = TextBlock(required=False)
     button_text = CharBlock(required=False)
-    button_url = URLBlock(required=False)
+    button_url = CharBlock(required=False)
 
 class AuthorBlock(BaseBlock):
     title = CharBlock(icon="title", classname="title")
@@ -197,7 +197,7 @@ class ActionButtonBlock(StructBlock):
     align_center = BooleanBlock(required=False)
     description = TextBlock()
     button_text = CharBlock()
-    button_url = URLBlock()
+    button_url = CharBlock()
 
 class TextImageBlock(StructBlock):
     image = ImageChooserBlock(required=True)
@@ -212,7 +212,7 @@ class RelatedLinkBlock(StructBlock):
     page = PageChooserBlock()
     
     title = CharBlock(required=False)
-    page_url = URLBlock(required=False)
+    page_url = CharBlock(required=False)
     search_description = TextBlock(required=False)
 
 class RelatedLinksBlock(StructBlock):
