@@ -5,7 +5,7 @@ from wagtail.core.blocks import (CharBlock, FieldBlock, ListBlock,
                                  BooleanBlock, TextBlock, URLBlock,
                                  ChoiceBlock, EmailBlock, IntegerBlock,
                                  RawHTMLBlock, RichTextBlock, StreamBlock,
-                                 StructBlock)
+                                 StructBlock, PageChooserBlock)
 from wagtail.embeds.blocks import EmbedBlock
 from wagtail.images.blocks import ImageChooserBlock
 
@@ -208,6 +208,16 @@ class TextImageBlock(StructBlock):
 class SummaryBlock(StructBlock):
     text = RichTextBlock()
 
+class RelatedLinkBlock(StructBlock):
+    page = PageChooserBlock()
+    
+    title = CharBlock(required=False)
+    page_url = URLBlock(required=False)
+    search_description = TextBlock(required=False)
+
+class RelatedLinksBlock(StructBlock):
+    links = ListBlock(RelatedLinkBlock)
+
 class ColumnContentBlock(StreamBlock):
     h2 = H2Block()
     tagged_h2 = TaggedH2Block()
@@ -216,6 +226,7 @@ class ColumnContentBlock(StreamBlock):
     action_button = ActionButtonBlock()
     text_image = TextImageBlock()
     summary = SummaryBlock()
+    related_links = RelatedLinksBlock()
 
 class ColumnBlock(StructBlock):
     columns = IntegerBlock()

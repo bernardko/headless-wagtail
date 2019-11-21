@@ -84,8 +84,6 @@ class WagtailImageNode(DjangoObjectType):
         ]
         return WagtailImageRenditionList(rendition_list=rendition_list)
 
-
-
 class RichTextString(Scalar):
     @staticmethod
     def serialize(value):
@@ -142,6 +140,48 @@ class ImageObjectType(graphene.ObjectType):
 
         # TODO: Error
 
+class PageInterface(graphene.Interface):
+    title = graphene.String()
+    page_title = graphene.String()
+    last_published_at = graphene.types.datetime.DateTime()
+    search_description = graphene.String()
+    search_image = graphene.Field(ImageObjectType)
+    slug = graphene.String()
+    specific_page_type = graphene.String()
+    page_url = graphene.String()
+
+    def resolve_page_title(self, info):
+        title = ''
+        if self.seo_title:
+            title += self.seo_title
+        else:
+            title += self.title
+
+        return title
+
+    def resolve_search_description(self, info):
+        description = self.title
+
+        if hasattr(self, 'listing_summary'):
+            if self.listing_summary:
+                description = self.listing_summary
+
+        if hasattr(self, 'search_description'):
+            if self.search_description:
+                description = self.search_description
+
+        return description
+
+    def resolve_search_image(self, info, **kwargs):
+        if hasattr(self, 'feed_image') and self.feed_image:
+            return self.feed_image
+
+    def resolve_specific_page_type(self, info):
+        return '%s.%s' % (self._meta.app_label, self.specific.__class__.__name__)
+
+    def resolve_page_url(self, info):
+        return self.get_url(current_site=info.context.site)
+
 class ImageTypeBlock(DefaultStreamBlock):
     image = graphene.Field(ImageObjectType)
 
@@ -187,8 +227,24 @@ class IconTextParagraphBlock(ImageTypeBlock):
 class TextImageBlock(ImageTypeBlock):
     pass
 
+class WagtailPageType(DefaultStreamBlock):
+    search_image = graphene.Field(ImageObjectType)
+
+    class Meta:
+        interfaces = [PageInterface]
+
+class RelatedLinkBlock(DefaultStreamBlock):
+    page = graphene.Field(WagtailPageType)
+
+    def resolve_page(self, info, **kwargs):
+        return Page.objects.get(id=self.page).specific
+
+class RelatedLinksBlock(DefaultStreamBlock):
+    (links, resolve_links) = create_stream_field_type('links', **{"links": RelatedLinkBlock})
+
 column_field_handlers = {
     "text_image": TextImageBlock,
+    "related_links": RelatedLinksBlock,
 }
 
 class CenterImageFeatureBlock(ImageTypeBlock):
@@ -199,55 +255,13 @@ class ColumnBlock(DefaultStreamBlock):
     (content, resolve_content) = create_stream_field_type('content', **column_field_handlers)
 
 stream_field_handers = {
-    "wide_image":WideImageBlock, 
-    "feature_slider":FeatureSliderBlock, 
-    "center_image_feature":CenterImageFeatureBlock, 
+    "wide_image": WideImageBlock, 
+    "feature_slider": FeatureSliderBlock, 
+    "center_image_feature": CenterImageFeatureBlock, 
     "stacked_feature_list": StackedFeatureListBlock,
     "author": AuthorBlock,
     "column": ColumnBlock
 }
-
-class PageInterface(graphene.Interface):
-    title = graphene.String()
-    page_title = graphene.String()
-    last_published_at = graphene.types.datetime.DateTime()
-    search_description = graphene.String()
-    search_image = graphene.Field(ImageObjectType)
-    slug = graphene.String()
-    specific_page_type = graphene.String()
-    page_url = graphene.String()
-
-    def resolve_page_title(self, info):
-        title = ''
-        if self.seo_title:
-            title += self.seo_title
-        else:
-            title += self.title
-
-        return title
-
-    def resolve_search_description(self, info):
-        description = self.title
-
-        if hasattr(self, 'listing_summary'):
-            if self.listing_summary:
-                description = self.listing_summary
-
-        if hasattr(self, 'search_description'):
-            if self.search_description:
-                description = self.search_description
-
-        return description
-
-    def resolve_search_image(self, info, **kwargs):
-        if hasattr(self, 'feed_image') and self.feed_image:
-            return self.feed_image
-
-    def resolve_specific_page_type(self, info):
-        return '%s.%s' % (self._meta.app_label, self.specific.__class__.__name__)
-
-    def resolve_page_url(self, info):
-        return self.get_url(current_site=info.context.site)
 
 class StreamField(Scalar):
     @staticmethod
@@ -270,6 +284,7 @@ class BreadcrumbObjectType(graphene.ObjectType):
 
     def resolve_link_url(self, info, **kwargs):
         return self.get_url(current_site=info.context.site)
+
 
 class LandingPageObjectType(DjangoObjectType):
     intro = graphene.String()
