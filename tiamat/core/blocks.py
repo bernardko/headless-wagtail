@@ -6,6 +6,7 @@ from wagtail.core.blocks import (CharBlock, FieldBlock, ListBlock,
                                  ChoiceBlock, EmailBlock, IntegerBlock,
                                  RawHTMLBlock, RichTextBlock, StreamBlock,
                                  StructBlock, PageChooserBlock)
+from wagtail.contrib.table_block.blocks import TableBlock
 from wagtail.embeds.blocks import EmbedBlock
 from wagtail.images.blocks import ImageChooserBlock
 
@@ -227,6 +228,7 @@ class ColumnContentBlock(StreamBlock):
     text_image = TextImageBlock()
     summary = SummaryBlock()
     related_links = RelatedLinksBlock()
+    table = TableBlock()
 
 class ColumnBlock(StructBlock):
     columns = IntegerBlock()

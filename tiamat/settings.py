@@ -47,6 +47,7 @@ class Common(Configuration):
         'wagtail.search',
         'wagtail.admin',
         'wagtail.core',
+        "wagtail.contrib.table_block",
 
         'modelcluster',
         'taggit',

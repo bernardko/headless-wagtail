@@ -13,7 +13,7 @@ from wagtail.contrib.redirects.models import Redirect
 from wagtail.core.models import Page
 from wagtail_graphql.types.streamfield import convert_stream_field
 
-from .streamfield import StreamFieldSerialiser, StreamFieldBuilder, Block, DefaultStreamBlock, create_stream_field_type
+from .streamfield import DefaultStreamBlock, create_stream_field_type
 from .utils import serialize_rich_text
 
 from tiamat.core.models import CoreImage, LandingPage, CategoryPage
@@ -143,6 +143,7 @@ class ImageObjectType(graphene.ObjectType):
 class PageInterface(graphene.Interface):
     title = graphene.String()
     page_title = graphene.String()
+    first_published_at = graphene.types.datetime.DateTime()
     last_published_at = graphene.types.datetime.DateTime()
     search_description = graphene.String()
     search_image = graphene.Field(ImageObjectType)
@@ -341,7 +342,7 @@ class CategoryPageObjectType(graphene.ObjectType):
             )
             qs = qs.filter(filter)
 
-        qs = qs.order_by('-first_published_at')
+        qs = qs.order_by('-last_published_at')
 
         if skip:
             qs = qs[skip:]

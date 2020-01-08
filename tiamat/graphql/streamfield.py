@@ -85,149 +85,149 @@ def create_stream_field_type(field_name, **kwargs):
 
     return (graphene.List(StreamFieldType), resolve_field)
 
-graphene_block_map = {
-    # choosers
-    #wagtail.images.blocks.ImageChooserBlock: (Image, _resolve_image),
-    #wagtail.core.blocks.PageChooserBlock: (Page, _resolve_page),
-    #wagtail.snippets.blocks.SnippetChooserBlock: (_snippet_handler, _resolve_snippet),
-    # standard fields
-    wagtail.core.blocks.CharBlock.__class__.__name__: graphene.types.String,
-    wagtail.core.blocks.URLBlock.__class__.__name__: graphene.types.String,
-    wagtail.core.blocks.DateBlock.__class__.__name__: graphene.types.Date,
-    wagtail.core.blocks.DateTimeBlock.__class__.__name__: graphene.types.DateTime,
-    wagtail.core.blocks.BooleanBlock.__class__.__name__: graphene.types.Boolean,
-    wagtail.core.blocks.IntegerBlock.__class__.__name__: graphene.types.Int,
-    wagtail.core.blocks.FloatBlock.__class__.__name__: graphene.types.Float,
-    wagtail.core.blocks.DecimalBlock.__class__.__name__: graphene.types.String,
-    wagtail.core.blocks.TextBlock.__class__.__name__: graphene.types.String,
-    wagtail.core.blocks.TimeBlock.__class__.__name__: graphene.types.Time,
-    wagtail.core.blocks.RichTextBlock.__class__.__name__: graphene.types.String,
-    wagtail.core.blocks.RawHTMLBlock.__class__.__name__: graphene.types.String,
-    wagtail.core.blocks.BlockQuoteBlock.__class__.__name__: graphene.types.String,
-    wagtail.core.blocks.ChoiceBlock.__class__.__name__: graphene.types.String,
-    wagtail.core.blocks.RegexBlock.__class__.__name__: graphene.types.String,
-    wagtail.core.blocks.EmailBlock.__class__.__name__: graphene.types.String,
-    wagtail.core.blocks.StaticBlock.__class__.__name__: graphene.types.String,
-}
+# graphene_block_map = {
+#     # choosers
+#     #wagtail.images.blocks.ImageChooserBlock: (Image, _resolve_image),
+#     #wagtail.core.blocks.PageChooserBlock: (Page, _resolve_page),
+#     #wagtail.snippets.blocks.SnippetChooserBlock: (_snippet_handler, _resolve_snippet),
+#     # standard fields
+#     wagtail.core.blocks.CharBlock.__class__.__name__: graphene.types.String,
+#     wagtail.core.blocks.URLBlock.__class__.__name__: graphene.types.String,
+#     wagtail.core.blocks.DateBlock.__class__.__name__: graphene.types.Date,
+#     wagtail.core.blocks.DateTimeBlock.__class__.__name__: graphene.types.DateTime,
+#     wagtail.core.blocks.BooleanBlock.__class__.__name__: graphene.types.Boolean,
+#     wagtail.core.blocks.IntegerBlock.__class__.__name__: graphene.types.Int,
+#     wagtail.core.blocks.FloatBlock.__class__.__name__: graphene.types.Float,
+#     wagtail.core.blocks.DecimalBlock.__class__.__name__: graphene.types.String,
+#     wagtail.core.blocks.TextBlock.__class__.__name__: graphene.types.String,
+#     wagtail.core.blocks.TimeBlock.__class__.__name__: graphene.types.Time,
+#     wagtail.core.blocks.RichTextBlock.__class__.__name__: graphene.types.String,
+#     wagtail.core.blocks.RawHTMLBlock.__class__.__name__: graphene.types.String,
+#     wagtail.core.blocks.BlockQuoteBlock.__class__.__name__: graphene.types.String,
+#     wagtail.core.blocks.ChoiceBlock.__class__.__name__: graphene.types.String,
+#     wagtail.core.blocks.RegexBlock.__class__.__name__: graphene.types.String,
+#     wagtail.core.blocks.EmailBlock.__class__.__name__: graphene.types.String,
+#     wagtail.core.blocks.StaticBlock.__class__.__name__: graphene.types.String,
+# }
 
-class Block(graphene.ObjectType):
-    pass
+# class Block(graphene.ObjectType):
+#     pass
 
-class StreamFieldBuilder:
+# class StreamFieldBuilder:
 
-    def build_struct_block(self, block, value):
-        struct_block_object_type = Block
-        for field_name, value in value.items():
-            child_block = block.child_blocks[field_name]
+#     def build_struct_block(self, block, value):
+#         struct_block_object_type = Block
+#         for field_name, value in value.items():
+#             child_block = block.child_blocks[field_name]
 
-            block_object = self.build_block(child_block, value)
-            field = graphene.Field(block_object)
-            struct_block_object_type._meta.fields.update({field_name: field})
-            setattr(struct_block_object_type, field_name, field)
+#             block_object = self.build_block(child_block, value)
+#             field = graphene.Field(block_object)
+#             struct_block_object_type._meta.fields.update({field_name: field})
+#             setattr(struct_block_object_type, field_name, field)
 
-        return struct_block_object_type
+#         return struct_block_object_type
 
-    def build_list_block(self, block, value):
-        for child_value in value:
-            block_object = self.build_block(block.child_block, child_value)
-            break
+#     def build_list_block(self, block, value):
+#         for child_value in value:
+#             block_object = self.build_block(block.child_block, child_value)
+#             break
 
-        list_block_object_type = graphene.List(block_object)
+#         list_block_object_type = graphene.List(block_object)
 
-        return list_block_object_type
+#         return list_block_object_type
 
-    def build_stream_block(self, value):
-        stream_block_object_type = Block
+#     def build_stream_block(self, value):
+#         stream_block_object_type = Block
 
-        blocks = {}
-        for child_block in value:
-            block_object = self.build_block(child_block.block, child_block.value)
-            blocks[child_block.block_type] = block_object
-            field = graphene.Field(block_object)
-            stream_block_object_type._meta.fields.update({child_block.block_type: field})
-            setattr(stream_block_object_type, child_block.block_type, field)
+#         blocks = {}
+#         for child_block in value:
+#             block_object = self.build_block(child_block.block, child_block.value)
+#             blocks[child_block.block_type] = block_object
+#             field = graphene.Field(block_object)
+#             stream_block_object_type._meta.fields.update({child_block.block_type: field})
+#             setattr(stream_block_object_type, child_block.block_type, field)
 
-        return (stream_block_object_type, blocks,)
+#         return (stream_block_object_type, blocks,)
 
-    def build_block(self, block, value):
-        if hasattr(block, 'to_graphql_representation'):
-            return block.to_graphql_representation(value)
-        elif isinstance(block, blocks.RichTextBlock):
-            return graphene.String
-        elif isinstance(block, EmbedBlock):
-            pass
-        elif isinstance(block, ImageChooserBlock):
-            pass
-        elif isinstance(block, blocks.StructBlock):
-            return self.build_struct_block(block, value)
-        elif isinstance(block, blocks.ListBlock):
-            return self.build_list_block(block, value)
-        elif isinstance(block, blocks.StreamBlock):
-            return self.build_stream_block(value)
-        else:
-            return graphene_block_map.get(block.__class__.__name__)
+#     def build_block(self, block, value):
+#         if hasattr(block, 'to_graphql_representation'):
+#             return block.to_graphql_representation(value)
+#         elif isinstance(block, blocks.RichTextBlock):
+#             return graphene.String
+#         elif isinstance(block, EmbedBlock):
+#             pass
+#         elif isinstance(block, ImageChooserBlock):
+#             pass
+#         elif isinstance(block, blocks.StructBlock):
+#             return self.build_struct_block(block, value)
+#         elif isinstance(block, blocks.ListBlock):
+#             return self.build_list_block(block, value)
+#         elif isinstance(block, blocks.StreamBlock):
+#             return self.build_stream_block(value)
+#         else:
+#             return graphene_block_map.get(block.__class__.__name__)
 
-class StreamFieldSerialiser:
-    def serialise_struct_block(self, block, value):
-        blocks = {}
-        for field_name, value in value.items():
-            child_block = block.child_blocks[field_name]
-            blocks[field_name] = self.serialise_block(child_block, value)
+# class StreamFieldSerialiser:
+#     def serialise_struct_block(self, block, value):
+#         blocks = {}
+#         for field_name, value in value.items():
+#             child_block = block.child_blocks[field_name]
+#             blocks[field_name] = self.serialise_block(child_block, value)
 
-        return blocks
+#         return blocks
 
-    def serialise_list_block(self, block, value):
-        blocks = []
-        for child_value in value:
-            blocks.append(self.serialise_block(block.child_block, child_value))
+#     def serialise_list_block(self, block, value):
+#         blocks = []
+#         for child_value in value:
+#             blocks.append(self.serialise_block(block.child_block, child_value))
 
-        return blocks
+#         return blocks
 
-    def serialise_stream_block(self, value):
-        blocks = []
-        for child_block in value:
-            blocks.append({
-                'type': child_block.block_type,
-                'value': self.serialise_block(child_block.block, child_block.value),
-            })
+#     def serialise_stream_block(self, value):
+#         blocks = []
+#         for child_block in value:
+#             blocks.append({
+#                 'type': child_block.block_type,
+#                 'value': self.serialise_block(child_block.block, child_block.value),
+#             })
 
-        return blocks
+#         return blocks
 
-    def serialise_block(self, block, value):
-        if hasattr(block, 'to_graphql_representation'):
-            return block.to_graphql_representation(value)
-        elif isinstance(block, blocks.RichTextBlock):
-            return serialize_rich_text(value.source)
-        elif isinstance(block, EmbedBlock):
-            try:
-                embed = get_embed(value.url)
-                return {
-                    'html': embed.html,
-                    'url': value.url,
-                }
-            except EmbedException:
-                return {
-                    'html': '',
-                    'url': None
-                }
-        elif isinstance(block, ImageChooserBlock):
-            # FIXME
-            if value is None:
-                return None
+#     def serialise_block(self, block, value):
+#         if hasattr(block, 'to_graphql_representation'):
+#             return block.to_graphql_representation(value)
+#         elif isinstance(block, blocks.RichTextBlock):
+#             return serialize_rich_text(value.source)
+#         elif isinstance(block, EmbedBlock):
+#             try:
+#                 embed = get_embed(value.url)
+#                 return {
+#                     'html': embed.html,
+#                     'url': value.url,
+#                 }
+#             except EmbedException:
+#                 return {
+#                     'html': '',
+#                     'url': None
+#                 }
+#         elif isinstance(block, ImageChooserBlock):
+#             # FIXME
+#             if value is None:
+#                 return None
                 
-            return {
-                'id': value.id,
-                'alt': value.title,
-                'src': settings.MEDIA_PREFIX + value.file.url,
-                'credit': value.credit,
-                'hash': value.get_file_hash()
-            }
+#             return {
+#                 'id': value.id,
+#                 'alt': value.title,
+#                 'src': settings.MEDIA_PREFIX + value.file.url,
+#                 'credit': value.credit,
+#                 'hash': value.get_file_hash()
+#             }
             
-        elif isinstance(block, blocks.FieldBlock):
-            return value
-        elif isinstance(block, blocks.StructBlock):
-            return self.serialise_struct_block(block, value)
-        elif isinstance(block, blocks.ListBlock):
-            return self.serialise_list_block(block, value)
-        elif isinstance(block, blocks.StreamBlock):
-            return self.serialise_stream_block(value)
+#         elif isinstance(block, blocks.FieldBlock):
+#             return value
+#         elif isinstance(block, blocks.StructBlock):
+#             return self.serialise_struct_block(block, value)
+#         elif isinstance(block, blocks.ListBlock):
+#             return self.serialise_list_block(block, value)
+#         elif isinstance(block, blocks.StreamBlock):
+#             return self.serialise_stream_block(value)
