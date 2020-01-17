@@ -12,6 +12,7 @@ from graphene_django import DjangoObjectType
 from wagtail.contrib.redirects.models import Redirect
 from wagtail.core.models import Page
 from wagtail_graphql.types.streamfield import convert_stream_field
+from wagtail.contrib.redirects.models import Redirect
 
 from .streamfield import DefaultStreamBlock, create_stream_field_type
 from .utils import serialize_rich_text
@@ -371,6 +372,22 @@ class NavMenuItemObjectType(graphene.ObjectType):
 
         return nav_menu_items
 
+class RedirectObjectType(DjangoObjectType):
+    old_path = graphene.String()
+    link = graphene.String()
+
+    class Meta:
+        model = Redirect
+
+    def resolve_old_path(self, info, **kwargs):
+        return self.old_path
+
+    def resolve_link(self, info, **kwargs):
+        if self.redirect_page:
+            return self.redirect_page.get_url(current_site=info.context.site)
+        elif self.redirect_link:
+            return self.redirect_link
+
 def get_page_preview(model, token):
     return model.get_page_from_preview_token(token)
 
@@ -379,6 +396,7 @@ class Query(graphene.ObjectType):
     landing_pages = graphene.List(LandingPageObjectType, preview_token=graphene.String(), slug=graphene.String())
     category_pages = graphene.List(CategoryPageObjectType, preview_token=graphene.String(), slug=graphene.String())
     images = graphene.List(ImageObjectType, ids=graphene.List(graphene.Int))
+    redirects = graphene.List(RedirectObjectType)
 
     def resolve_nav_menu_items(self, info, **kwargs):
         nav_menu_items = Page.objects.in_site(info.context.site).live().public().in_menu()
@@ -421,6 +439,11 @@ class Query(graphene.ObjectType):
             images = images.filter(id__in=kwargs['ids'])
 
         return images
+
+    def resolve_redirects(self, info, **kwargs):
+        redirects = Redirect.objects.filter(site=info.context.site).all()
+        
+        return redirects
 
 schema = graphene.Schema(
     query=Query,
