@@ -334,7 +334,7 @@ class CategoryPageObjectType(graphene.ObjectType):
         return self.get_ancestors()[1:]
 
     def resolve_landing_pages(self, info, search=None, first=None, skip=None, **kwargs):
-        qs = LandingPage.objects.in_site(info.context.site).live().public().descendant_of(self).order_by('-last_published_at')
+        qs = self.landing_pages.in_site(info.context.site)
 
         if search:
             filter = (

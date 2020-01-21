@@ -19,6 +19,10 @@ from wagtail.images.models import AbstractImage, AbstractRendition, Image
 from wagtail.search import index
 from wagtail.snippets.models import register_snippet
 
+from modelcluster.fields import ParentalKey
+from modelcluster.contrib.taggit import ClusterTaggableManager
+from taggit.models import TaggedItemBase
+
 from headlesspreview.models import HeadlessPreviewMixin
 
 from .blocks import LandingBlock, StoryBlock
@@ -115,8 +119,6 @@ class ContactFields(models.Model):
     class Meta:
         abstract = True
 
-
-
 # Custom image
 class CoreImage(AbstractImage):
     credit = models.CharField(max_length=255, blank=True)
@@ -172,6 +174,9 @@ class BasePage(Page):
     class Meta:
         abstract = True
 
+class LandingPageTag(TaggedItemBase):
+    content_object = ParentalKey('core.LandingPage', on_delete=models.CASCADE, related_name='tagged_items')
+
 class LandingPage(HeadlessPreviewMixin, BasePage):
     feed_image = models.ForeignKey(
         'core.CoreImage',
@@ -182,6 +187,8 @@ class LandingPage(HeadlessPreviewMixin, BasePage):
     )
     author = models.ForeignKey(Author, null=True, blank=True, on_delete=models.SET_NULL)
     body = StreamField(LandingBlock(required=False), null=True, blank=True)
+
+    tags = ClusterTaggableManager(through=LandingPageTag, blank=True)
 
     def get_sitemap_urls(self):
         site = self.get_site()
@@ -203,6 +210,20 @@ LandingPage.content_panels = [
     StreamFieldPanel('body'),
 ]
 
+LandingPage.promote_panels = Page.promote_panels + [
+    FieldPanel('tags'),
+]
+
+class PageFilterTag(models.Model):
+    category_page = ParentalKey('core.CategoryPage', related_name="pagefiltertag_set")
+    tag = models.ForeignKey(
+        'taggit.Tag',
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='+'
+    )
+
 class CategoryPage(HeadlessPreviewMixin, BasePage):
     body = StreamField(LandingBlock(required=False), null=True, blank=True)
     num_per_page = models.IntegerField(default=10)
@@ -213,7 +234,11 @@ class CategoryPage(HeadlessPreviewMixin, BasePage):
 
     @property
     def landing_pages(self):
-        return  LandingPage.objects.live().descendant_of(self).order_by('-date')
+        q = LandingPage.objects.live().public()
+        filtertags = [pft.tag for pft in self.pagefiltertag_set.all()]
+        q = q.filter(tags__in=filtertags)
+
+        return q.order_by('-last_published_at')
 
     def serve(self, request):
         return render(request, self.template, {
@@ -227,7 +252,8 @@ class CategoryPage(HeadlessPreviewMixin, BasePage):
         FieldPanel('menu_title'),
         FieldPanel('intro'),
         StreamFieldPanel('body'),
-        FieldPanel('num_per_page')
+        FieldPanel('num_per_page'),
+        InlinePanel('pagefiltertag_set', label='Page Filter Tag')
     ]
 
     promote_panels = [

@@ -167,6 +167,8 @@ class Common(Configuration):
 
     CORS_URLS_REGEX = r'^(\/graphql\/.*)$'
 
+    TAGGIT_CASE_INSENSITIVE = True
+
 
 class Development(Common):
     """
