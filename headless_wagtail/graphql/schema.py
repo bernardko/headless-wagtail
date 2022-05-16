@@ -17,7 +17,7 @@ from wagtail.contrib.redirects.models import Redirect
 from .streamfield import DefaultStreamBlock, create_stream_field_type
 from .utils import serialize_rich_text
 
-from tiamat.core.models import CoreImage, LandingPage, CategoryPage
+from headless_wagtail.core.models import CoreImage, LandingPage, CategoryPage
 
 specified_rules[:] = [
     rule for rule in specified_rules
@@ -359,7 +359,7 @@ class CategoryPageObjectType(graphene.ObjectType):
 class NavMenuItemObjectType(graphene.ObjectType):
     name = graphene.String()
     link_url = graphene.String()
-    children = graphene.List('tiamat.graphql.schema.NavMenuItemObjectType')
+    children = graphene.List('headless_wagtail.graphql.schema.NavMenuItemObjectType')
 
     def resolve_name(self, info, **kwargs):
         return self.specific.menu_title

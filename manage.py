@@ -4,7 +4,7 @@ import sys
 
 if __name__ == '__main__':
     configuration = os.getenv('ENVIRONMENT', 'development').title()
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tiamat.settings')
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'headless_wagtail.settings')
     os.environ.setdefault('DJANGO_CONFIGURATION', configuration)
 
     try:

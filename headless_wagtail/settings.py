@@ -1,5 +1,5 @@
 """
-Django settings for tiamat project.
+Django settings for headless_wagtail project.
 
 For more information on this file, see
 https://docs.djangoproject.com/en/2.2/topics/settings/
@@ -59,8 +59,8 @@ class Common(Configuration):
         'wagtail_graphql',
         'graphene_django',
 
-        'tiamat.users',
-        'tiamat.core',
+        'headless_wagtail.users',
+        'headless_wagtail.core',
     ]
 
     MIDDLEWARE = [
@@ -78,7 +78,7 @@ class Common(Configuration):
         'wagtail.contrib.redirects.middleware.RedirectMiddleware',
     ]
 
-    ROOT_URLCONF = 'tiamat.urls'
+    ROOT_URLCONF = 'headless_wagtail.urls'
 
     TEMPLATES = [
         {
@@ -96,7 +96,7 @@ class Common(Configuration):
         },
     ]
 
-    WSGI_APPLICATION = 'tiamat.wsgi.application'
+    WSGI_APPLICATION = 'headless_wagtail.wsgi.application'
 
     # Database
     # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
@@ -139,17 +139,17 @@ class Common(Configuration):
     STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-    MEDIA_PREFIX = "http://artoria:8000"
+    MEDIA_PREFIX = "http://artoria:8002"
     MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
     MEDIA_URL = values.Value('/media/')
 
     AUTH_USER_MODEL = 'users.User'
 
-    WAGTAIL_SITE_NAME = 'Tiamat'
+    WAGTAIL_SITE_NAME = 'Headless Wagtail'
     WAGTAILIMAGES_IMAGE_MODEL = 'core.CoreImage'
 
     GRAPHENE = {
-        'SCHEMA': 'tiamat.graphql.schema.schema'
+        'SCHEMA': 'headless_wagtail.graphql.schema.schema'
         #'SCHEMA': 'wagtail_graphql.schema.schema',
     }
 
